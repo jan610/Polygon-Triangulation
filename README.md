@@ -2,7 +2,7 @@
 
 A Triangulation Algorithms made in AppGameKit
 
-These Librarys and Tool are able to create Contourlist, Polylinelist and Trianlges from one Image as input.
+This Tool and Library can be used to create Contourlists, Polylinelists and Trianlges from one Image as input.
 
 ## Screenshots
 
