@@ -6,7 +6,7 @@ These Librarys and Tool are able to create Contourlist, Polylinelist and Trianlg
 
 ## Screenshots
 
-![Preview](doc/images/From Image To Triangle Mesh.jpg)
+![Preview](doc/images/From Image To Triangle Mesh.JPG)
 
 ## Videos
 
