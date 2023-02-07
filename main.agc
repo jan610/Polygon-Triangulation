@@ -21,10 +21,9 @@ SetOrientationAllowed( 1, 1, 1, 1 ) // allow both portrait and landscape on mobi
 SetSyncRate( 30, 0 ) // 30fps instead of 60 to save battery
 SetScissor( 0,0,0,0 ) // use the maximum available screen space, no black borders
 UseNewDefaultFonts( 1 )
-MaximizeWindow()
-
 SetDefaultMinFilter(0)
 SetDefaultMagFilter(0)
+SetViewZoomMode(1)
 
 #Constant KEY_1 49
 #Constant KEY_2 50
@@ -48,6 +47,7 @@ IndexList as integer[]
 
 ImageID=LoadImage("penguin.png")
 SpriteID=CreateSprite(ImageID)
+SetSpriteCategoryBit(SpriteID,1,0)
 SetVirtualResolution(GetImageWidth(ImageID),GetImageHeight(ImageID))
 
 //[IDEGUIADD],header,Polygon Triangulation Tool
@@ -65,6 +65,8 @@ global EpsilonThreshold# = 1.000000 //[IDEGUIADD],float,Epsilon
 //[IDEGUIADD],message,This threshold value that determines the maximum permissible deviation from the original curve
 //[IDEGUIADD],message,The smaller the value of epsilon, the more aggressive the simplification process and the fewer points that remain on the simplified curve.
 
+
+ViewZoom#=1.0
 do
 	print("Press 1, 2, 3 for the different Algorithm steps and Press 4 to remove it all again")
 	print("Outline: "+str(Outline.length))
@@ -74,6 +76,8 @@ do
 	print("Epsilon: "+str(EpsilonThreshold#,2))
     PointerX#=GetPointerX()
     PointerY#=GetPointerY()
+    WorldPointerX#=ScreenToWorldX(PointerX#)
+    WorldPointerY#=ScreenToWorldY(PointerY#)
     
     if GetFileExists(File$)
     	DeleteImage(ImageID)
@@ -99,9 +103,25 @@ do
 		DeleteWidgets(WidgedList)
 	endif
 	
-    if GetPointerPressed()=1 then HitSpriteID=GetSpriteHit(PointerX#,PointerY#)
-    if GetPointerState()=1 then MovePoint(PointList, WidgedList, HitSpriteID, PointerX#, PointerY#)
-    if GetPointerReleased()=1 then HitSpriteID=-1
+	HitSpriteID=GetSpriteHitCategory(1,WorldPointerX#,WorldPointerY#)
+    if GetPointerPressed()=1 then WidgedSpriteID=HitSpriteID
+    if GetPointerState()=1 then MovePoint(PointList, WidgedList, WidgedSpriteID, WorldPointerX#, WorldPointerY#)
+    if GetPointerReleased()=1 then WidgedSpriteID=-1
+    
+	if GetSpriteExists(WidgedSpriteID)=0
+		ViewZoom#=Core_Clamp(ViewZoom#+GetRawMouseWheelDelta()/30.0,0.1,10)
+		print(ViewZoom#)
+		SetViewZoom(ViewZoom#)
+		if GetPointerPressed()=1
+			DragX#=PointerX#+ViewX#
+			DragY#=PointerY#+ViewY#
+		endif
+		if GetPointerState()=1
+			ViewX#=DragX#-PointerX#
+			ViewY#=DragY#-PointerY#
+			SetViewOffset(ViewX#,ViewY#)
+		endif
+   	endif
 	
 	CT_DrawOutline(Outline,255,0,0)
 	DP_DrawLines(PointList,0,255,0)
@@ -119,6 +139,7 @@ function CreatePointWidgeds(PointList ref as Core_Int2Data[], WidgedList ref as 
 		TempWidged.PointID=ID
 		SetSpriteScale(TempWidged.SpriteID,4,4)
 		SetSpritePositionByOffset(TempWidged.SpriteID,PointList[ID].X,PointList[ID].Y)
+		SetSpriteCategoryBit(TempWidged.SpriteID,1,1)
 		TempWidged.TextID=CreateText(str(ID))
 		SetTextPosition(TempWidged.TextID,GetSpriteXByOffset(TempWidged.SpriteID),GetSpriteYByOffset(TempWidged.SpriteID)-GetSpriteHeight(TempWidged.SpriteID)*0.5)
 		SetTextAlignment(TempWidged.TextID,1)

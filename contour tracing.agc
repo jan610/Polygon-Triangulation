@@ -16,10 +16,14 @@ function CT_DeleteOutline(Outline ref as Core_Int2Data[])
 	Outline.length=-1
 endfunction
 
-function CT_DrawOutline(Outline ref as Core_Int2Data[],Red,Geen,Blue)
+function CT_DrawOutline(Outline ref as Core_Int2Data[],Red,Green,Blue)
 	length=Outline.length
 	for PixelID=0 to length-1
-		DrawLine(Outline[PixelID].X,Outline[PixelID].Y,Outline[mod(PixelID+1,length)].X,Outline[mod(PixelID+1,length)].Y,Red,Geen,Blue)
+		StartX#=WorldToScreenX(Outline[PixelID].X)
+		StartY#=WorldToScreenY(Outline[PixelID].Y)
+		EndX#=WorldToScreenX(Outline[mod(PixelID+1,length)].X)
+		EndY#=WorldToScreenY(Outline[mod(PixelID+1,length)].Y)
+		DrawLine(StartX#,StartY#,EndX#,EndY#,Red,Green,Blue)
 	next PixelID
 endfunction
 

@@ -16,10 +16,18 @@ endfunction
 
 function DP_DrawLines(Points ref as Core_Int2Data[],Red,Green,Blue)
     for PointID=1 to Points.length
-    	DrawLine(Points[PointID-1].X,Points[PointID-1].Y,Points[PointID].X,Points[PointID].Y,Red,Green,Blue)
+  		StartX#=WorldToScreenX(Points[PointID-1].X)
+		StartY#=WorldToScreenY(Points[PointID-1].Y)
+		EndX#=WorldToScreenX(Points[PointID].X)
+		EndY#=WorldToScreenY(Points[PointID].Y)
+    	DrawLine(StartX#,StartY#,EndX#,EndY#,Red,Green,Blue)
     next PointID
     if Points.length>1
-    	DrawLine(Points[0].X,Points[0].Y,Points[Points.length].X,Points[Points.length].Y,Red,Green,Blue)
+  		StartX#=WorldToScreenX(Points[0].X)
+		StartY#=WorldToScreenY(Points[0].Y)
+		EndX#=WorldToScreenX(Points[Points.length].X)
+		EndY#=WorldToScreenY(Points[Points.length].Y)
+    	DrawLine(StartX#,StartY#,EndX#,EndY#,Red,Green,Blue)
     endif
 endfunction
 
