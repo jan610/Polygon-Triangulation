@@ -5,32 +5,20 @@ function DP_CreatePolyline(Points ref as Core_Int2Data[],ResultingPoints ref as 
 	DP_DeletePolyline(ResultingPoints)
 	Points.insert(Points[0]) 				// insert start point
 	DP_DecimatePolyline(Points,ResultingPoints,0,Points.length,Epsilon#)
-	Points.insert(Points[Points.length]) 	// insert end point
+//~	Points.insert(Points[Points.length]) 	// insert end point
+//~	Points.remove(Points.length)
+	Points.remove(Points.length)
 endfunction
 
 function DP_DeletePolyline(Points ref as Core_Int2Data[])
-	for PointID=0 to Points.length
-		TextID=PointID+1
-		if GetTextExists(TextID)=1 then DeleteText(TextID)
-	next PointID
 	Points.length=-1
 endfunction
 
 function DP_DrawLines(Points ref as Core_Int2Data[],Red,Green,Blue)
     for PointID=1 to Points.length
-    	TextID=PointID+1
-    	if GetTextExists(TextID)=0
-    		CreateText(TextID,str(PointID))
-    		SetTextPosition(TextID,Points[PointID].X,Points[PointID].Y)
-    	endif
     	DrawLine(Points[PointID-1].X,Points[PointID-1].Y,Points[PointID].X,Points[PointID].Y,Red,Green,Blue)
     next PointID
     if Points.length>1
-    	TextID=1
-    	if GetTextExists(TextID)=0
-    		CreateText(TextID,"0")
-    		SetTextPosition(TextID,Points[0].X,Points[0].Y)
-    	endif
     	DrawLine(Points[0].X,Points[0].Y,Points[Points.length].X,Points[Points.length].Y,Red,Green,Blue)
     endif
 endfunction

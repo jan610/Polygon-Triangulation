@@ -31,6 +31,17 @@ SetDefaultMagFilter(0)
 #Constant KEY_3 51
 #Constant KEY_4 52
 
+type WidgedData
+	SpriteID as integer
+	PointID as integer
+	TextID as integer
+endtype
+
+global WidgedImageID
+WidgedImageID=CreateImageColor(0,255,0,64)
+
+WidgedList as WidgedData[]
+
 Outline as Core_Int2Data[]
 PointList as Core_Int2Data[]
 IndexList as integer[]
@@ -61,8 +72,8 @@ do
 	print("Indices: "+str(IndexList.length))
 	print("Alpha: "+str(AlphaThreshold))
 	print("Epsilon: "+str(EpsilonThreshold#,2))
-    PointerX=GetPointerX()
-    PointerY=GetPointerY()
+    PointerX#=GetPointerX()
+    PointerY#=GetPointerY()
     
     if GetFileExists(File$)
     	DeleteImage(ImageID)
@@ -75,17 +86,65 @@ do
 	endif
     
 	if GetRawKeyPressed(KEY_1) then CT_CreateOutline(ImageID, Outline, AlphaThreshold)
-	if GetRawKeyPressed(KEY_2) then DP_CreatePolyline(Outline, PointList, EpsilonThreshold#)
+	if GetRawKeyPressed(KEY_2)
+		DP_CreatePolyline(Outline, PointList, EpsilonThreshold#)
+		CreatePointWidgeds(PointList, WidgedList)
+	endif
 	if GetRawKeyPressed(KEY_3) then PT_Triangulate(PointList, IndexList)
 	if GetRawKeyPressed(KEY_4)
 		CT_DeleteOutline(Outline)
 		DP_DeletePolyline(PointList)
 		PT_DeleteTriangles(IndexList)
+		
+		DeleteWidgets(WidgedList)
 	endif
+	
+    if GetPointerPressed()=1 then HitSpriteID=GetSpriteHit(PointerX#,PointerY#)
+    if GetPointerState()=1 then MovePoint(PointList, WidgedList, HitSpriteID, PointerX#, PointerY#)
+    if GetPointerReleased()=1 then HitSpriteID=-1
 	
 	CT_DrawOutline(Outline,255,0,0)
 	DP_DrawLines(PointList,0,255,0)
 	PT_DrawTriangles(PointList,IndexList,0,0,255)
-    
+	
     Sync()
 loop
+
+function CreatePointWidgeds(PointList ref as Core_Int2Data[], WidgedList ref as WidgedData[])	
+	DeleteWidgets(WidgedList)
+	
+	TempWidged as WidgedData
+	for ID=0 to PointList.length
+		TempWidged.SpriteID=CreateSprite(WidgedImageID)
+		TempWidged.PointID=ID
+		SetSpriteScale(TempWidged.SpriteID,4,4)
+		SetSpritePositionByOffset(TempWidged.SpriteID,PointList[ID].X,PointList[ID].Y)
+		TempWidged.TextID=CreateText(str(ID))
+		SetTextPosition(TempWidged.TextID,GetSpriteXByOffset(TempWidged.SpriteID),GetSpriteYByOffset(TempWidged.SpriteID)-GetSpriteHeight(TempWidged.SpriteID)*0.5)
+		SetTextAlignment(TempWidged.TextID,1)
+		SetTextColor(TempWidged.TextID,255,255,255,255)
+		WidgedList.insertsorted(TempWidged)
+	next ID
+endfunction
+
+function DeleteWidgets(WidgedList ref as WidgedData[])
+	for WidgetID=0 to WidgedList.length
+		if GetSpriteExists(WidgedList[WidgetID].SpriteID)=1 then DeleteSprite(WidgedList[WidgetID].SpriteID)
+		if GetTextExists(WidgedList[WidgetID].TextID)=1 then DeleteText(WidgedList[WidgetID].TextID)
+	next WidgetID
+	WidgedList.length=-1
+endfunction
+
+function MovePoint(PointList ref as Core_Int2Data[], WidgedList ref as WidgedData[], SpriteID, PosX#, PosY#)
+	if GetSpriteExists(SpriteID)=1
+		WidgetID=WidgedList.find(SpriteID)
+		if WidgetID>0 and WidgetID<WidgedList.length
+			PointID=WidgedList[WidgetID].PointID
+			PointList[PointID].X=PosX#
+			PointList[PointID].Y=PosY#
+			SetSpritePositionByOffset(SpriteID,PosX#,PosY#)
+			TextHeight#=GetSpriteHeight(SpriteID)*0.5
+			SetTextPosition(WidgedList[WidgetID].TextID,PosX#,PosY#-TextHeight#)
+		endif
+	endif
+endfunction
